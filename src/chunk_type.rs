@@ -3,30 +3,30 @@ use std::fmt::Display;
 use std::str::FromStr;
 
 #[derive(Debug)]
-struct ChunkType {
+pub struct ChunkType {
     data: [u8; 4],
 }
 
 impl ChunkType {
-    fn bytes(&self) -> [u8; 4] {
+    pub fn bytes(&self) -> [u8; 4] {
         self.data
     }
-    fn is_valid(&self) -> bool {
+    pub fn is_valid(&self) -> bool {
         self.data
             .iter()
             .all(|&b| (b >= b'a' && b <= b'z' || (b >= b'A' && b <= b'Z')))
             && self.is_reserved_bit_valid()
     }
-    fn is_critical(&self) -> bool {
+    pub fn is_critical(&self) -> bool {
         self.data[0] & 0x20 != 0x20
     }
-    fn is_public(&self) -> bool {
+    pub fn is_public(&self) -> bool {
         self.data[1] & 0x20 != 0x20
     }
-    fn is_reserved_bit_valid(&self) -> bool {
+    pub fn is_reserved_bit_valid(&self) -> bool {
         (self.data[2] & 0x20) != 0x20
     }
-    fn is_safe_to_copy(&self) -> bool {
+    pub fn is_safe_to_copy(&self) -> bool {
         self.data[3] & 0x20 == 0x20
     }
 }
