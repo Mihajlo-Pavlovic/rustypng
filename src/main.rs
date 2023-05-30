@@ -1,8 +1,8 @@
 // mod args;
 mod chunk;
 mod chunk_type;
+pub mod png;
 // mod commands;
-// mod png;
 
 /// Generic PNGme error
 pub type Error = Box<dyn std::error::Error>;

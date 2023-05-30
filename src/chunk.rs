@@ -2,8 +2,8 @@ use core::fmt;
 use std::fmt::Display;
 
 use crate::chunk_type::ChunkType;
-use crate::Result;
 use crate::Error;
+use crate::Result;
 
 use crc32fast::Hasher;
 #[derive(Debug, PartialEq)]
@@ -19,7 +19,7 @@ impl Chunk {
             data: data,
         }
     }
-    fn length(&self) -> u32 {
+    pub fn length(&self) -> u32 {
         self.data.len().try_into().unwrap()
     }
     pub fn chunk_type(&self) -> &ChunkType {
@@ -29,7 +29,13 @@ impl Chunk {
         self.data.as_slice()
     }
     pub fn crc(&self) -> u32 {
-        let bytes : Vec<u8> = self.chunk_type.bytes().iter().chain(self.data.iter()).copied().collect();
+        let bytes: Vec<u8> = self
+            .chunk_type
+            .bytes()
+            .iter()
+            .chain(self.data.iter())
+            .copied()
+            .collect();
 
         let mut hasher = Hasher::new();
         hasher.update(&bytes);
