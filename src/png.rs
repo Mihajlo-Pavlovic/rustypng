@@ -1,4 +1,5 @@
 use core::fmt;
+use std::fmt::Display;
 
 use crate::{Result, chunk::Chunk, Error};
 
@@ -19,27 +20,68 @@ impl Png {
     pub fn header(&self) -> &[u8; 8] { &Png::STANDARD_HEADER }
     pub fn chunks(&self) -> &[Chunk] { &self.chunks }
     pub fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> { self.chunks.iter().find(|c| c.chunk_type().to_string() == chunk_type) }
-    pub fn as_bytes(&self) -> Vec<u8> { self.chunks.iter().flat_map(|chunk| chunk.as_bytes()).collect()}
+    pub fn as_bytes(&self) -> Vec<u8> { 
+        let header: Vec<u8>= self.header().iter().copied().collect();
+        let body: Vec<u8> = self.chunks.iter().flat_map(|chunk| chunk.as_bytes()).collect();
+
+        header.into_iter().chain(body.into_iter()).collect()
+    }
     pub fn from_chunks(chunks: Vec<Chunk>) -> Png { Self {chunks}}
 }
 impl TryFrom<&[u8]> for Png {
     type Error = Error;
 
-    fn try_from(bytes: &[u8]) -> Result<Png> {
+    fn try_from(bytes: &[u8]) -> Result<Self> {
         if bytes.len() < Png::STANDARD_HEADER.len() {
-            return Err("");
+            return Err(Box::from(PngError::TooSmall));
         }
 
         let header = &bytes[0..8];
-        
+        if Png::STANDARD_HEADER != header {
+            return Err(Box::from(PngError::InvalidHeader));
+        }
 
+        let mut chunks = Vec::new();
+
+        let mut index = 8;
+
+        while index < bytes.len() {
+            let bytes = &bytes[index..];
+            let chunk = Chunk::try_from(bytes)?;
+            index += (chunk.length() as usize) + Chunk::METADATA_BYTES;
+
+            chunks.push(chunk);
+        }
+
+        Ok(Png { chunks })
+
+
+    }
+}
+
+#[derive(Debug)]
+pub enum PngError {
+    InvalidHeader,
+    TooSmall,
+    UnknownChunkType,
+}
+
+impl std::error::Error for PngError {}
+
+impl Display for PngError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            PngError::InvalidHeader => write!(f, "Invalid header"),
+            PngError::TooSmall => write!(f, "The given source is too small to be a valid PNG file"),
+            PngError::UnknownChunkType => write!(f, "Unknown chunk type"),
+        }
     }
 }
 
 impl fmt::Display for Png {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut png_string = String::from("");
-        self.chunks.iter().for_each(|c| png_string.app);
+        // let mut png_string = String::from("");
+        // self.chunks.iter().for_each(|c| png_string.app);
         Ok(())
     }
 }

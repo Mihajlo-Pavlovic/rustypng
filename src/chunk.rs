@@ -13,6 +13,16 @@ pub struct Chunk {
 }
 
 impl Chunk {
+    pub const DATA_LENGTH_BYTES: usize = 4;
+    pub const CHUNK_TYPE_BYTES: usize = 4;
+    pub const CRC_BYTES: usize = 4;
+
+    /// Total size of the of the metadata making up a chunk
+    pub const METADATA_BYTES: usize =
+        Chunk::DATA_LENGTH_BYTES + Chunk::CHUNK_TYPE_BYTES + Chunk::CRC_BYTES;
+
+
+
     pub fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
         Chunk {
             chunk_type: chunk_type,
