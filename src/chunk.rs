@@ -21,8 +21,6 @@ impl Chunk {
     pub const METADATA_BYTES: usize =
         Chunk::DATA_LENGTH_BYTES + Chunk::CHUNK_TYPE_BYTES + Chunk::CRC_BYTES;
 
-
-
     pub fn new(chunk_type: ChunkType, data: Vec<u8>) -> Chunk {
         Chunk {
             chunk_type: chunk_type,
